@@ -41,16 +41,29 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt
 if (MSVC)
   if (Qt6_DIR)
     set(WIN_DEPLOY_QT ${Qt6_DIR}/../../../bin/windeployqt)
+    set(LRELEASE ${Qt6_DIR}/../../../bin/lrelease)
+    set(LUPDATE ${Qt6_DIR}/../../../bin/lupdate)
   elseif (CMAKE_PREFIX_PATH)
     set(WIN_DEPLOY_QT ${CMAKE_PREFIX_PATH}/bin/windeployqt)
+    set(LRELEASE ${CMAKE_PREFIX_PATH}/bin/lrelease)
+    set(LUPDATE ${CMAKE_PREFIX_PATH}/bin/lupdate)
   endif ()
 
-  if (WIN_DEPLOY_QT)
+  if (WIN_DEPLOY_QT AND LRELEASE)
     add_custom_command(TARGET ${PROJECT_NAME}
       POST_BUILD
       COMMAND SET
       ARGS VCINSTALLDIR=${CMAKE_CXX_COMPILER}/../../../../../../../
       COMMAND ${WIN_DEPLOY_QT}
-      ARGS $<$<CONFIG:Debug>:--debug> $<$<CONFIG:Release>:--release> $<TARGET_FILE:${PROJECT_NAME}>)
+      ARGS $<$<CONFIG:Debug>:--debug> $<$<CONFIG:Release>:--release> $<TARGET_FILE:${PROJECT_NAME}>
+      COMMAND ${LRELEASE}
+      ARGS ${CMAKE_SOURCE_DIR}/translations/danmaku_zh_CN.ts -qm $<TARGET_FILE_DIR:${PROJECT_NAME}>/translations/danmaku_zh_CN.qm)
+  endif ()
+
+  if (LUPDATE)
+    add_custom_command(TARGET ${PROJECT_NAME}
+      PRE_BUILD
+      COMMAND ${LUPDATE}
+      ARGS ${SOURCE_FILES} -ts ${CMAKE_SOURCE_DIR}/translations/danmaku_zh_CN.ts)
   endif ()
 endif ()

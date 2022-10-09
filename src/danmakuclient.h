@@ -8,7 +8,7 @@ class QTimer;
 
 class DanmakuClient : public QObject {
   Q_OBJECT
-  Q_DISABLE_COPY(DanmakuClient)
+  Q_DISABLE_COPY_MOVE(DanmakuClient)
 
 public:
   enum {

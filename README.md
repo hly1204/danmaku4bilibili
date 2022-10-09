@@ -217,4 +217,4 @@ Library.
 ## 参考资料
 
 - [获取bilibili直播弹幕的WebSocket协议 - 炒鸡嗨客协管徐](https://blog.csdn.net/xfgryujk/article/details/80306776).
-- [通过WebSocket获取bilibili直播弹幕 - yy祝](https://blog.csdn.net/yyznm/article/details/116543107),
+- [通过WebSocket获取bilibili直播弹幕 - yy祝](https://blog.csdn.net/yyznm/article/details/116543107).

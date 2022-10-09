@@ -68,7 +68,10 @@ DanmakuClient::DanmakuClient(QObject *parent) : QObject(parent), webSocket_(new 
             continue;
           }
           Q_ASSERT(json.isObject());
-          emit receivedJson(subprotocolVersion, suboperation, subseq, json.object());
+          QJsonObject obj = json.object();
+          emit receivedJson(subprotocolVersion, suboperation, subseq, obj);
+          if (obj["cmd"] == "DANMU_MSG")
+            emit receivedDanmaku(obj);
 
           s += subpackageLength;
           b += subpackageLength - subheaderLength;
@@ -81,7 +84,10 @@ DanmakuClient::DanmakuClient(QObject *parent) : QObject(parent), webSocket_(new 
           break;
         }
         Q_ASSERT(json.isObject());
-        emit receivedJson(protocolVersion, operation, seq, json.object());
+        QJsonObject obj = json.object();
+        emit receivedJson(protocolVersion, operation, seq, obj);
+        if (obj["cmd"] == "DANMU_MSG")
+          emit receivedDanmaku(obj);
       }
       break;
     default:
@@ -114,7 +120,7 @@ void DanmakuClient::listen(int roomid) {
     qToBigEndian<quint16>(16, a += sizeof(quint32)); // 包头大小
     qToBigEndian<quint16>(1, a += sizeof(quint16));  // 协议版本
     qToBigEndian<quint32>(7, a += sizeof(quint16));  // 操作码(认证并加入房间)
-    qToBigEndian<quint32>(1, a += sizeof(quint32));  // 请求编码(原样返回)
+    qToBigEndian<quint32>(1, a += sizeof(quint32));  // ?
     webSocket_->sendBinaryMessage(msg);
     timer_->start();
   });
@@ -134,6 +140,6 @@ void DanmakuClient::heartbeat(quint32 seq) {
   qToBigEndian<quint16>(16, a += sizeof(quint32));  // 包头大小
   qToBigEndian<quint16>(1, a += sizeof(quint16));   // 协议版本
   qToBigEndian<quint32>(2, a += sizeof(quint16));   // 操作码(心跳)
-  qToBigEndian<quint32>(seq, a += sizeof(quint32)); // 请求编码(原样返回)
+  qToBigEndian<quint32>(seq, a += sizeof(quint32)); // ?
   webSocket_->sendBinaryMessage(msg);
 }
