@@ -16,7 +16,7 @@ add_executable(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
   PROPERTIES
     POSITION_INDEPENDENT_CODE True
-    WIN32_EXECUTABLE False
+    WIN32_EXECUTABLE True
     AUTOMOC ON
     AUTOUIC ON
     AUTORCC ON
@@ -56,14 +56,16 @@ if (MSVC)
       ARGS VCINSTALLDIR=${CMAKE_CXX_COMPILER}/../../../../../../../
       COMMAND ${WIN_DEPLOY_QT}
       ARGS $<$<CONFIG:Debug>:--debug> $<$<CONFIG:Release>:--release> $<TARGET_FILE:${PROJECT_NAME}>
+      COMMAND ${CMAKE_COMMAND} -E
+      ARGS make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/i18n
       COMMAND ${LRELEASE}
-      ARGS ${CMAKE_SOURCE_DIR}/translations/danmaku_zh_CN.ts -qm $<TARGET_FILE_DIR:${PROJECT_NAME}>/translations/danmaku_zh_CN.qm)
+      ARGS ${CMAKE_SOURCE_DIR}/i18n/danmaku_zh_CN.ts -qm $<TARGET_FILE_DIR:${PROJECT_NAME}>/i18n/danmaku_zh_CN.qm)
   endif ()
 
   if (LUPDATE)
     add_custom_command(TARGET ${PROJECT_NAME}
       PRE_BUILD
       COMMAND ${LUPDATE}
-      ARGS ${SOURCE_FILES} -ts ${CMAKE_SOURCE_DIR}/translations/danmaku_zh_CN.ts)
+      ARGS ${SOURCE_FILES} -ts ${CMAKE_SOURCE_DIR}/i18n/danmaku_zh_CN.ts)
   endif ()
 endif ()

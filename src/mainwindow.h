@@ -6,7 +6,7 @@
 class QWidget;
 class QMenuBar;
 class QStatusBar;
-class DanmakuClient;
+class QTableView;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -15,11 +15,14 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = nullptr);
 
+protected:
+  void resizeEvent(QResizeEvent *event) override;
+
 private:
   QWidget *centralWidget_;
   QMenuBar *menuBar_;
   QStatusBar *statusBar_;
-  DanmakuClient *danmakuClient_;
+  QTableView *danmakuTableView_;
 };
 
 #endif
