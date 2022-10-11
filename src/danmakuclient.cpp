@@ -68,10 +68,10 @@ DanmakuClient::DanmakuClient(QObject *parent)
         case InfoNotification:
             qDebug() << "Info Notification";
             if (protocolVersion == 2) {
-                bool             success;
-                const QByteArray ucdata = zlib_uncompress(data.right(data.size() - headerLength), &success);
+                bool             ok;
+                const QByteArray ucdata = zlib_uncompress(data.right(data.size() - headerLength), &ok);
                 // ucdata 有多条数据, 根据每个头去取数据即可
-                if (!success) break;
+                if (!ok) break;
                 qDebug() << "ucdata.size:" << ucdata.size();
                 const char *b = ucdata.constData();
                 for (int s = 0, n = ucdata.size(); s < n;) {
