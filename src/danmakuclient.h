@@ -17,7 +17,6 @@ public:
                                ListenResponse    = 8 };
 
     explicit DanmakuClient(QObject *parent = nullptr);
-    ~DanmakuClient() override;
 
 public slots:
     /// \brief 监听房间号(最多只允许调用一次)

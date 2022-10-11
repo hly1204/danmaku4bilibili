@@ -114,8 +114,6 @@ DanmakuClient::DanmakuClient(QObject *parent)
     });
 }
 
-DanmakuClient::~DanmakuClient() {}
-
 void DanmakuClient::listen(int roomid)
 {
     Q_ASSERT(roomid > 0);
