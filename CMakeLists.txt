@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(danmaku
-  VERSION 1.0.0.0
-  DESCRIPTION "A Lightweight Danmaku Client for Bilibili"
+  VERSION 1.0.1.0
+  DESCRIPTION "Danmaku Client"
   HOMEPAGE_URL "https://github.com/hly1204/danmaku4bilibili"
   LANGUAGES CXX)
 

@@ -27,38 +27,45 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="16"/>
+        <location filename="../src/mainwindow.cpp" line="21"/>
+        <location filename="../src/mainwindow.cpp" line="53"/>
         <source>Danmaku Client</source>
         <translation>弹幕机</translation>
     </message>
-</context>
-<context>
-    <name>QAction</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="23"/>
+        <location filename="../src/mainwindow.cpp" line="34"/>
+        <source>Config</source>
+        <translation>配置</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="35"/>
         <source>Listen</source>
         <translation>监听</translation>
     </message>
-</context>
-<context>
-    <name>QInputDialog</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="27"/>
+        <location filename="../src/mainwindow.cpp" line="36"/>
+        <source>Stop</source>
+        <translation>停止</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="41"/>
         <source>Please input the room ID</source>
         <translation>请输入房间号</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="27"/>
+        <location filename="../src/mainwindow.cpp" line="41"/>
         <source>room ID</source>
         <translation>房间号</translation>
     </message>
-</context>
-<context>
-    <name>QMenu</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="22"/>
-        <source>Config</source>
-        <translation>设置</translation>
+        <location filename="../src/mainwindow.cpp" line="61"/>
+        <source>Clear</source>
+        <translation>清屏</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="64"/>
+        <source>Always scroll to bottom</source>
+        <translation>总是移动到底部</translation>
     </message>
 </context>
 </TS>
