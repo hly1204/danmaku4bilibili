@@ -1,13 +1,15 @@
 #include "mainwindow.h"
 #include "danmakuclient.h"
 #include "danmakutablemodel.h"
+#include <QApplication>
+#include <QFileInfo>
 #include <QInputDialog>
 #include <QMenuBar>
 #include <QResizeEvent>
-#include <QScrollBar>
 #include <QStatusBar>
 #include <QString>
 #include <QTableView>
+#include <QTimer>
 #include <QWidget>
 #include <numeric>
 
@@ -52,6 +54,19 @@ MainWindow::MainWindow(QWidget *parent)
             actionStop->setEnabled(false);
             setWindowTitle(tr("Danmaku Client"));
         });
+        // 当可执行文件名被修改为房间号时直接监听对应房间号
+        QFileInfo info(QApplication::applicationName());
+        Q_ASSERT(info.isExecutable());
+        bool ok;
+        int  roomid = info.baseName().toInt(&ok);
+        if (ok) {
+            QTimer::singleShot(20, [this, actionListen, actionStop, roomid]() {
+                actionListen->setEnabled(false);
+                actionStop->setEnabled(true);
+                qobject_cast<DanmakuTableModel *>(danmakuTableView_->model())->listen(roomid);
+                setWindowTitle(windowTitle().prepend(QString::number(roomid) + " - "));
+            });
+        }
     }
     // 配置右键弹出菜单
     {
