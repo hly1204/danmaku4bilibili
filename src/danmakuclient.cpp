@@ -5,21 +5,18 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QTimer>
+#include <QTimerEvent>
 #include <QUrl>
 #include <QWebSocket>
 #include <QtEndian>
 #include <QtGlobal>
+#include <chrono>
 
 DanmakuClient::DanmakuClient(QObject *parent)
     : QObject(parent),
-      webSocket_(new QWebSocket),
-      timer_(new QTimer(this))
+      webSocket_(new QWebSocket)
 {
     webSocket_->setParent(this);
-    // 绑定心跳
-    timer_->callOnTimeout(this, [this]() { heartbeat(114514); });
-    timer_->setInterval(30000);
     connect(webSocket_, &QWebSocket::connected, this, [this]() {
         emit connected();
         qDebug() << "Connected:" << roomid_;
@@ -38,11 +35,14 @@ DanmakuClient::DanmakuClient(QObject *parent)
         qToBigEndian<quint32>(7, a += sizeof(quint16));  // 操作码(认证并加入房间)
         qToBigEndian<quint32>(1, a += sizeof(quint32));  // ?
         webSocket_->sendBinaryMessage(msg);
-        timer_->start();
+        using namespace std::chrono_literals;
+        timerid_ = startTimer(30s);
+        if (timerid_ == 0) qDebug() << "Unable to set timer.";
     });
     connect(webSocket_, &QWebSocket::disconnected, this, [this]() {
         emit disconnected();
-        timer_->stop();
+        if (timerid_ != 0) killTimer(timerid_);
+        timerid_ = 0;
     });
     connect(webSocket_, &QWebSocket::binaryMessageReceived, this, [this](const QByteArray &data) {
         const char *a             = data.constData();
@@ -126,6 +126,12 @@ void DanmakuClient::stop()
 {
     webSocket_->close();
     roomid_ = 0;
+}
+
+void DanmakuClient::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == timerid_) heartbeat();
+    return QObject::timerEvent(event);
 }
 
 void DanmakuClient::heartbeat(quint32 seq)

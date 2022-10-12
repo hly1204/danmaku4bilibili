@@ -4,7 +4,6 @@
 #include <QObject>
 
 class QWebSocket;
-class QTimer;
 
 class DanmakuClient : public QObject
 {
@@ -29,12 +28,15 @@ signals:
     void connected();
     void disconnected();
 
+protected:
+    void timerEvent(QTimerEvent *event) override;
+
 private slots:
     void heartbeat(quint32 seq = 1);
 
 private:
     QWebSocket *webSocket_ = {};
-    QTimer     *timer_     = {};
+    int         timerid_   = {};
     int         roomid_    = {};
 };
 
