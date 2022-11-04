@@ -5,10 +5,6 @@ project(danmaku
   HOMEPAGE_URL "https://github.com/hly1204/danmaku4bilibili"
   LANGUAGES CXX)
 
-if (NOT ZLIB_DIR)
-  message(ERROR "Cannot find zlib")
-endif ()
-
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets WebSockets)
 
 add_executable(${PROJECT_NAME})
@@ -34,11 +30,10 @@ else ()
   file(GLOB SOURCE_FILES src/*)
 endif ()
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${ZLIB_DIR}/include)
-target_link_directories(${PROJECT_NAME} PRIVATE ${ZLIB_DIR}/lib)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::WebSockets zlibstatic)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::WebSockets)
 
 if (MSVC)
+
   if (Qt6_DIR)
     set(WIN_DEPLOY_QT ${Qt6_DIR}/../../../bin/windeployqt)
     set(LRELEASE ${Qt6_DIR}/../../../bin/lrelease)
@@ -68,4 +63,5 @@ if (MSVC)
       COMMAND ${LUPDATE}
       ARGS ${SOURCE_FILES} -ts ${CMAKE_SOURCE_DIR}/i18n/danmaku_zh_CN.ts)
   endif ()
+
 endif ()

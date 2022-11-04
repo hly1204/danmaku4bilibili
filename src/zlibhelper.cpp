@@ -1,7 +1,7 @@
 #include "zlibhelper.h"
 #include <QDebug>
 #include <QtGlobal>
-#include <zlib.h>
+#include <QtZlib/zlib.h>
 
 QByteArray zlib_compress(QByteArrayView source, bool *ok)
 {
