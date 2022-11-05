@@ -14,13 +14,13 @@ DanmakuTableModel::DanmakuTableModel(QObject *parent)
 int DanmakuTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return danmaku_.size();
+    return static_cast<int>(danmaku_.size());
 }
 
 int DanmakuTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return header_.size();
+    return static_cast<int>(header_.size());
 }
 
 QVariant DanmakuTableModel::data(const QModelIndex &index, int role) const
@@ -28,13 +28,13 @@ QVariant DanmakuTableModel::data(const QModelIndex &index, int role) const
     do {
         if (!index.isValid()) break;
         const int r = index.row(), c = index.column();
-        if (r >= rowCount() || c >= columnCount()) break;
+        if (r >= rowCount(QModelIndex()) || c >= columnCount(QModelIndex())) break;
         switch (role) {
         case Qt::DisplayRole: return danmaku_[r][c];
         default: break;
         }
     } while (false);
-    return QVariant();
+    return {};
 }
 
 QVariant DanmakuTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -47,7 +47,7 @@ QVariant DanmakuTableModel::headerData(int section, Qt::Orientation orientation,
         }
         [[fallthrough]];
     case Qt::Vertical: [[fallthrough]];
-    default: return QVariant();
+    default: return {};
     }
 }
 
@@ -61,7 +61,7 @@ void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
     }
     connect(danmakuClient_ = client, &DanmakuClient::receivedDanmaku, this, [this](const QJsonValue &json) {
         /// TODO: 房间号判断过滤?
-        const int r = rowCount();
+        const int r = rowCount(QModelIndex());
         beginInsertRows(QModelIndex(), r, r);
         const QJsonValue jsonInfo = json["info"];
         // clang-format off

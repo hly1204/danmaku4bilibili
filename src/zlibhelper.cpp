@@ -11,7 +11,7 @@ QByteArray zlib_compress(QByteArrayView source, bool *ok)
     if (::compress(reinterpret_cast<uchar *>(res.data()), &bound, reinterpret_cast<const uchar *>(source.constData()), n) != Z_OK) {
         if (ok != nullptr) *ok = false;
         qWarning() << __func__ << "ERROR";
-        return QByteArray();
+        return {};
     }
     if (ok != nullptr) *ok = true;
     res.resize(bound);
@@ -35,7 +35,7 @@ QByteArray zlib_uncompress(QByteArrayView source, bool *ok)
         case Z_MEM_ERROR:
             if (ok != nullptr) *ok = false;
             qWarning() << __func__ << "ERROR";
-            return QByteArray();
+            return {};
         case Z_BUF_ERROR: bound <<= 1; continue;
         }
     }

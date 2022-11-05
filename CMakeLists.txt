@@ -12,7 +12,7 @@ add_executable(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
   PROPERTIES
     POSITION_INDEPENDENT_CODE True
-    WIN32_EXECUTABLE True
+    WIN32_EXECUTABLE $<IF:$<CONFIG:Debug>,False,True>
     AUTOMOC ON
     AUTOUIC ON
     AUTORCC ON

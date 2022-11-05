@@ -22,10 +22,10 @@ MainWindow::MainWindow(QWidget *parent)
     setStatusBar(new QStatusBar(this));
     setWindowTitle(tr("Danmaku Client"));
     setMinimumSize(320, 240);
-    DanmakuClient *danmakuClient = new DanmakuClient(this);
+    auto danmakuClient = new DanmakuClient(this);
     danmakuTableView_->setParent(centralWidget());
     {
-        DanmakuTableModel *danmakuTableModel = new DanmakuTableModel(this);
+        auto danmakuTableModel = new DanmakuTableModel(this);
         danmakuTableModel->setDanmakuClient(danmakuClient);
         danmakuTableView_->setModel(danmakuTableModel);
     }
@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
             setWindowTitle(tr("Danmaku Client"));
         });
         // 当可执行文件名被修改为房间号时直接监听对应房间号
-        QFileInfo info(QApplication::applicationName());
+        QFileInfo info(QApplication::applicationFilePath());
         Q_ASSERT(info.isExecutable());
         bool ok;
         int  roomid = info.baseName().toInt(&ok);
@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 配置右键弹出菜单
     {
         danmakuTableView_->setContextMenuPolicy(Qt::CustomContextMenu);
-        QMenu *menu = new QMenu(this);
+        auto menu = new QMenu(this);
         connect(danmakuTableView_, &QTableView::customContextMenuRequested, menu, [this, menu](const QPoint &pos) { menu->popup(danmakuTableView_->mapToGlobal(pos)); });
         QAction *actionClear = menu->addAction(tr("Clear"));
         actionClear->setEnabled(true);

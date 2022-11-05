@@ -1,4 +1,7 @@
 .vscode/
+.idea/
 build/
+build-Debug/
+build-Release/
 3rdparty/
 *.bat

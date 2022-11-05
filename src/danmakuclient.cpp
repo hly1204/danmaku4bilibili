@@ -22,11 +22,14 @@ DanmakuClient::DanmakuClient(QObject *parent)
         qDebug() << "Connected:" << roomid_;
         QByteArray  msg(16, '\0');
         QJsonObject json;
-        json["uid"]       = 0;
-        json["roomid"]    = roomid_;
-        json["protover"]  = 1;
-        json["platform"]  = "web";
-        json["clientver"] = "1.4.0";
+        {
+            using namespace Qt::Literals::StringLiterals;
+            json["uid"_L1]       = 0;
+            json["roomid"_L1]    = roomid_;
+            json["protover"_L1]  = 1;
+            json["platform"_L1]  = "web"_L1;
+            json["clientver"_L1] = "1.4.0"_L1;
+        }
         msg.append(QJsonDocument(json).toJson(QJsonDocument::Compact));
         char *a = msg.data();
         qToBigEndian<quint32>(msg.size(), a);            // 包总大小
@@ -45,14 +48,14 @@ DanmakuClient::DanmakuClient(QObject *parent)
         timerid_ = 0;
     });
     connect(webSocket_, &QWebSocket::binaryMessageReceived, this, [this](const QByteArray &data) {
-        const char *a             = data.constData();
-        quint32     packageLength = qFromBigEndian<quint32>(a);
-        quint16     headerLength  = qFromBigEndian<quint16>(a += sizeof(quint32));
+        const char *a               = data.constData();
+        auto        packageLength   = qFromBigEndian<quint32>(a);
+        auto        headerLength    = qFromBigEndian<quint16>(a += sizeof(quint32));
+        auto        protocolVersion = qFromBigEndian<quint16>(a += sizeof(quint16));
+        auto        operation       = qFromBigEndian<quint32>(a += sizeof(quint16));
+        auto        seq             = qFromBigEndian<quint32>(a += sizeof(quint32));
         Q_ASSERT(headerLength == 16);
-        quint16 protocolVersion = qFromBigEndian<quint16>(a += sizeof(quint16));
-        quint32 operation       = qFromBigEndian<quint32>(a += sizeof(quint16));
-        quint32 seq             = qFromBigEndian<quint32>(a += sizeof(quint32));
-        a += sizeof(quint32);
+        /// TODO: 对于收到二进制信息的处理应该用一个函数，其中包含递归的过程。
         // clang-format off
         qDebug() << "data.size:"       << data.size()
                  << "packageLength:"   << packageLength
@@ -74,13 +77,13 @@ DanmakuClient::DanmakuClient(QObject *parent)
                 if (!ok) break;
                 qDebug() << "ucdata.size:" << ucdata.size();
                 const char *b = ucdata.constData();
-                for (int s = 0, n = ucdata.size(); s < n;) {
-                    quint32 subpackageLength = qFromBigEndian<quint32>(b);
-                    quint16 subheaderLength  = qFromBigEndian<quint16>(b += sizeof(quint32));
+                for (int s = 0, n = static_cast<int>(ucdata.size()); s < n;) {
+                    auto subpackageLength = qFromBigEndian<quint32>(b);
+                    auto subheaderLength  = qFromBigEndian<quint16>(b += sizeof(quint32));
                     Q_ASSERT(subheaderLength == 16);
-                    quint16 subprotocolVersion = qFromBigEndian<quint16>(b += sizeof(quint16));
-                    quint32 suboperation       = qFromBigEndian<quint32>(b += sizeof(quint16));
-                    quint32 subseq             = qFromBigEndian<quint32>(b += sizeof(quint32));
+                    auto subprotocolVersion = qFromBigEndian<quint16>(b += sizeof(quint16));
+                    auto suboperation       = qFromBigEndian<quint32>(b += sizeof(quint16));
+                    auto subseq             = qFromBigEndian<quint32>(b += sizeof(quint32));
                     b += sizeof(quint32);
                     qDebug() << QString::fromUtf8(b, subpackageLength - subheaderLength);
                     QJsonParseError error;
@@ -92,8 +95,11 @@ DanmakuClient::DanmakuClient(QObject *parent)
                     Q_ASSERT(json.isObject());
                     QJsonObject obj = json.object();
                     emit receivedJson(subprotocolVersion, suboperation, subseq, obj);
-                    if (obj["cmd"] == "DANMU_MSG") emit receivedDanmaku(obj);
-                    s += subpackageLength;
+                    {
+                        using namespace Qt::Literals::StringLiterals;
+                        if (obj["cmd"] == "DANMU_MSG"_L1) emit receivedDanmaku(obj);
+                    }
+                    s += static_cast<int>(subpackageLength);
                     b += subpackageLength - subheaderLength;
                 }
             } else {
@@ -106,7 +112,10 @@ DanmakuClient::DanmakuClient(QObject *parent)
                 Q_ASSERT(json.isObject());
                 QJsonObject obj = json.object();
                 emit receivedJson(protocolVersion, operation, seq, obj);
-                if (obj["cmd"] == "DANMU_MSG") emit receivedDanmaku(obj);
+                {
+                    using namespace Qt::Literals::StringLiterals;
+                    if (obj["cmd"] == "DANMU_MSG"_L1) emit receivedDanmaku(obj);
+                }
             }
             break;
         default: qDebug() << "Unknown operation:" << operation; break;
@@ -119,7 +128,8 @@ void DanmakuClient::listen(int roomid)
     Q_ASSERT(roomid > 0);
     qDebug() << "Listen" << roomid;
     roomid_ = roomid;
-    webSocket_->open(QUrl("wss://broadcastlv.chat.bilibili.com/sub"));
+    using namespace Qt::Literals::StringLiterals;
+    webSocket_->open(QUrl("wss://broadcastlv.chat.bilibili.com/sub"_L1));
 }
 
 void DanmakuClient::stop()
