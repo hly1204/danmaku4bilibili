@@ -5,10 +5,14 @@
 #include <QJsonValue>
 #include <QtGlobal>
 
+using namespace Qt::Literals::StringLiterals;
+
 DanmakuTableModel::DanmakuTableModel(QObject *parent)
-    : QAbstractTableModel(parent)
+    : QAbstractTableModel(parent),
+      danmakuClient_(),
+      header_({u"时间"_s, u"UID"_s, u"用户名"_s, u"弹幕"_s}),
+      roomid_()
 {
-    header_ << tr("Time") << tr("UID") << tr("Username") << tr("Danmaku");
 }
 
 int DanmakuTableModel::rowCount(const QModelIndex &parent) const
@@ -56,19 +60,21 @@ DanmakuClient *DanmakuTableModel::danmakuClient() const { return danmakuClient_;
 void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
 {
     if (danmakuClient_ != nullptr) {
-        qWarning() << __func__ << "danmakuClient != nullptr";
+        qWarning() << __func__ << "danmakuClient != nullptr"_L1;
         return;
     }
-    connect(danmakuClient_ = client, &DanmakuClient::receivedDanmaku, this, [this](const QJsonValue &json) {
-        /// TODO: 房间号判断过滤?
-        const int r = rowCount(QModelIndex());
-        beginInsertRows(QModelIndex(), r, r);
-        const QJsonValue jsonInfo = json["info"];
-        // clang-format off
+    danmakuClient_ = client;
+    connect(danmakuClient_ = client, &DanmakuClient::receivedMessage, this, [this](const QJsonObject &json) {
+        if (json["cmd"_L1] == "DANMU_MSG"_L1) {
+            const int r = rowCount(QModelIndex());
+            beginInsertRows(QModelIndex(), r, r);
+            const QJsonValue jsonInfo = json["info"_L1];
+            // clang-format off
             danmaku_.emplaceBack() << QDateTime::currentDateTime() << jsonInfo[2][0].toInt()
                                    << jsonInfo[2][1].toString()    << jsonInfo[1].toString();
-        // clang-format on
-        endInsertRows();
+            // clang-format on
+            endInsertRows();
+        }
     });
 }
 
@@ -76,11 +82,11 @@ void DanmakuTableModel::listen(int roomid)
 {
     do {
         if (danmakuClient_ == nullptr) {
-            qWarning() << __func__ << "danmakuClient == nullptr";
+            qWarning() << __FILE__ << __LINE__ << "danmakuClient == nullptr"_L1;
             break;
         }
         if (roomid_ != 0) {
-            qWarning() << __func__ << "doubly called";
+            qWarning() << __FILE__ << __LINE__ << u"二次调用"_s;
             break;
         }
         danmakuClient_->listen(roomid_ = roomid);

@@ -1,9 +1,11 @@
 #ifndef DANMAKU_CLIENT_H
 #define DANMAKU_CLIENT_H
 
+#include <QJsonObject>
 #include <QObject>
 
 class QWebSocket;
+class QNetworkAccessManager;
 
 class DanmakuClient : public QObject
 {
@@ -11,20 +13,36 @@ class DanmakuClient : public QObject
     Q_DISABLE_COPY_MOVE(DanmakuClient)
 
 public:
-    enum Operation : quint32 { HeartbeatResponse = 3,
-                               InfoNotification  = 5,
-                               ListenResponse    = 8 };
+    enum MessageType : int {
+        DANMU_MSG,                     ///< 弹幕消息
+        WELCOME_GUARD,                 ///< 欢迎老爷
+        ENTRY_EFFECT,                  ///< 舰长进入房间
+        WELCOME,                       ///< 用户进入房间
+        SUPER_CHAT_MESSAGE_JPN,        ///< 日语 SC
+        SUPER_CHAT,                    ///< SC
+        SEND_GIFT,                     ///< 投喂礼物
+        COMBO_SEND,                    ///< 连击礼物
+        ANCHOR_LOT_START,              ///< 天选之人信息开始
+        ANCHOR_LOT_END,                ///< 天选之人信息结束
+        ANCHOR_LOT_AWARD,              ///< 天选之人获奖信息
+        GUARD_BUY,                     ///< 上舰长
+        USER_TOAST_MSG,                ///< 续费舰长
+        NOTICE_MSG,                    ///< 本房间续费了舰长 (区别与自动续费?)
+        ACTIVITY_BANNER_UPDATE_V2,     ///< 小时榜变动
+        ROOM_REAL_TIME_MESSAGE_UPDATE, ///< 粉丝关注变动
+    };
 
     explicit DanmakuClient(QObject *parent = nullptr);
 
 public slots:
     /// \brief 监听房间号(最多只允许调用一次)
     void listen(int roomid);
+    /// \brief 停止监听
     void stop();
 
 signals:
-    void receivedJson(quint16 protocolVersion, quint32 operation, quint32 seq, const QJsonValue &json);
-    void receivedDanmaku(const QJsonValue &json);
+    void receivedMessage(const QJsonObject &json);
+    void flushPopularity(quint32 popularity);
     void connected();
     void disconnected();
 
@@ -32,12 +50,14 @@ protected:
     void timerEvent(QTimerEvent *event) override;
 
 private slots:
-    void heartbeat(quint32 seq = 1);
+    void heartbeat();
+    void OnReceivedMessage(const QByteArray &message);
 
 private:
-    QWebSocket *webSocket_ = {};
-    int         timerid_   = {};
-    int         roomid_    = {};
+    QWebSocket            *webSocket_;
+    QNetworkAccessManager *manager_;
+    int                    timerid_;
+    int                    roomid_;
 };
 
 #endif

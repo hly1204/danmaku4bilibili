@@ -17,7 +17,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    QTableView *danmakuTableView_ = {};
+    QTableView *danmakuTableView_;
 };
 
 #endif

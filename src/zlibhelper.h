@@ -2,6 +2,7 @@
 #define ZLIB_HELPER_H
 
 #include <QByteArray>
+#include <QByteArrayView>
 
 /// \brief 标准 ZLIB 的压缩
 /// \param[in] source 源

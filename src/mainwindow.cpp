@@ -13,6 +13,8 @@
 #include <QWidget>
 #include <numeric>
 
+using namespace Qt::Literals::StringLiterals;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       danmakuTableView_(new QTableView)
@@ -20,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(new QWidget(this));
     setMenuBar(new QMenuBar(this));
     setStatusBar(new QStatusBar(this));
-    setWindowTitle(tr("Danmaku Client"));
+    setWindowTitle(u"弹幕客户端"_s);
     setMinimumSize(320, 240);
     auto danmakuClient = new DanmakuClient(this);
     danmakuTableView_->setParent(centralWidget());
@@ -33,14 +35,14 @@ MainWindow::MainWindow(QWidget *parent)
     resize(640, 480);
     // 配置 menuBar
     {
-        QMenu   *menuConfig   = menuBar()->addMenu(tr("Config"));
-        QAction *actionListen = menuConfig->addAction(tr("Listen"));
-        QAction *actionStop   = menuConfig->addAction(tr("Stop"));
+        QMenu   *menuConfig   = menuBar()->addMenu(u"配置"_s);
+        QAction *actionListen = menuConfig->addAction(u"监听"_s);
+        QAction *actionStop   = menuConfig->addAction(u"停止"_s);
         actionListen->setEnabled(true);
         actionStop->setEnabled(false);
         connect(actionListen, &QAction::triggered, this, [this, actionListen, actionStop]() {
             bool ok;
-            int  roomid = QInputDialog::getInt(this, tr("Please input the room ID"), tr("room ID"), 0, 1, std::numeric_limits<int>::max(), 1, &ok);
+            int  roomid = QInputDialog::getInt(this, u"请输入房间号"_s, u"房间号"_s, 0, 1, std::numeric_limits<int>::max(), 1, &ok);
             if (ok) {
                 actionListen->setEnabled(false);
                 actionStop->setEnabled(true);
@@ -52,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
             qobject_cast<DanmakuTableModel *>(danmakuTableView_->model())->stop();
             actionListen->setEnabled(true);
             actionStop->setEnabled(false);
-            setWindowTitle(tr("Danmaku Client"));
+            setWindowTitle(u"弹幕客户端"_s);
         });
         // 当可执行文件名被修改为房间号时直接监听对应房间号
         QFileInfo info(QApplication::applicationFilePath());
@@ -73,10 +75,10 @@ MainWindow::MainWindow(QWidget *parent)
         danmakuTableView_->setContextMenuPolicy(Qt::CustomContextMenu);
         auto menu = new QMenu(this);
         connect(danmakuTableView_, &QTableView::customContextMenuRequested, menu, [this, menu](const QPoint &pos) { menu->popup(danmakuTableView_->mapToGlobal(pos)); });
-        QAction *actionClear = menu->addAction(tr("Clear"));
+        QAction *actionClear = menu->addAction(u"清屏"_s);
         actionClear->setEnabled(true);
         connect(actionClear, &QAction::triggered, qobject_cast<DanmakuTableModel *>(danmakuTableView_->model()), &DanmakuTableModel::clear);
-        QAction *actionAlwaysScrollToBottom = menu->addAction(tr("Always scroll to bottom"));
+        QAction *actionAlwaysScrollToBottom = menu->addAction(u"总是滚动到底部"_s);
         actionClear->setEnabled(true);
         actionAlwaysScrollToBottom->setCheckable(true);
         actionAlwaysScrollToBottom->setChecked(true);
