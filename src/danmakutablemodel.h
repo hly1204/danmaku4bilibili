@@ -7,7 +7,8 @@
 #include <QVariant>
 #include <QVector>
 
-class DanmakuClient;
+// CUSTOM
+QT_FORWARD_DECLARE_CLASS(DanmakuClient);
 
 class DanmakuTableModel : public QAbstractTableModel
 {
@@ -34,6 +35,7 @@ public slots:
 private:
     DanmakuClient             *danmakuClient_;
     QVector<QString>           header_;
+    QVector<QSize>             headerSize_;
     QVector<QVector<QVariant>> danmaku_;
     int                        roomid_;
 };

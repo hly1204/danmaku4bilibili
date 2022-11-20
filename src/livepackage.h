@@ -18,6 +18,7 @@ public:
     quint32    sequenceID;      ///< 数据包头部长度 (固定长度见枚举类型)
     QByteArray body;            ///< 包主体
 
+    /// \brief 其他
     enum Misc {
         HEADER_SIZE              = 16, ///< 数据包头部长度
         PROTOCOL_VERSION_REQUEST = 1,  ///< 请求协议版本
@@ -40,9 +41,6 @@ public:
         ENTER_ROOM          = 7, ///< 进入房间, WebSocket 连接成功后发送的第一条必须为进入房间的信息
         ENTER_ROOM_RESPONSE = 8, ///< 进入房价的响应
     };
-
-    /// \brief 消息类型
-    enum Messgae : quint32 {};
 
     /// \brief 将包转换为二进制数组
     /// \details 其中包的长度和头部长度会自动设置, 不会使用当前的值
@@ -108,16 +106,15 @@ public:
     /// \returns 包
     static inline LivePackage makeEnterRoomPackage(int roomid, int uid = 0)
     {
-        QJsonObject json;
-        {
-            using namespace Qt::Literals::StringLiterals;
-            json["clientver"_L1] = "1.6.3"_L1; // 客户端版本 (非必须)
-            json["platform"_L1]  = "web"_L1;   // 平台 (非必须)
-            json["protover"_L1]  = 2;          // 协议版本 (1 或 2, 为 1 时不会使用 zlib 压缩, 否则可能使用, 但实际测试好像没用) (非必须)
-            json["roomid"_L1]    = roomid;     // 房间号 (特殊房间需要用接口获取真实房间号) (必须)
-            json["uid"_L1]       = uid;        // 进入房间的用户 (非必须)
-            json["type"_L1]      = 2;          // 不知道是啥 (非必须)
-        }
+        using namespace Qt::Literals::StringLiterals;
+        QJsonObject json{
+            {"clientver"_L1, "1.6.3"_L1}, // 客户端版本 (非必须)
+            {"platform"_L1, "web"_L1},    // 平台 (非必须)
+            {"protover"_L1, 2},           // 协议版本 (1 或 2, 为 1 时不会使用 zlib 压缩, 否则可能使用, 但实际测试好像没用) (非必须)
+            {"roomid"_L1, roomid},        // 房间号 (特殊房间需要用接口获取真实房间号) (必须)
+            {"uid"_L1, uid},              // 进入房间的用户 (非必须)
+            {"type"_L1, 2}                // 不知道是啥 (非必须)
+        };
         return makeRequestPackage(QJsonDocument(json).toJson(QJsonDocument::Compact), ENTER_ROOM);
     }
 

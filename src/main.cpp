@@ -1,13 +1,18 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QScopedPointer>
+#include <QSettings>
+#include <QTranslator>
 
 using namespace Qt::Literals::StringLiterals;
 
 int main(int argc, char *argv[])
 {
+    QApplication::setStyle("Fusion"_L1);
     QScopedPointer a(new QApplication(argc, argv));
-    a->setStyle("Fusion"_L1);
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, a->applicationDirPath());
+    QTranslator t;
+    if (t.load("qt_zh_CN"_L1, a->applicationDirPath() + "/translations"_L1)) a->installTranslator(&t);
     MainWindow w;
     w.show();
     return a->exec();

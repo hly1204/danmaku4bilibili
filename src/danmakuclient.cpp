@@ -40,7 +40,7 @@ DanmakuClient::DanmakuClient(QObject *parent)
         if (timerid_ != 0) killTimer(timerid_);
         timerid_ = 0;
     });
-    connect(webSocket_, &QWebSocket::binaryMessageReceived, this, &DanmakuClient::OnReceivedMessage);
+    connect(webSocket_, &QWebSocket::binaryMessageReceived, this, &DanmakuClient::OnMessageReceived);
     connect(manager_, &QNetworkAccessManager::finished, this, [](QNetworkReply *reply) {
         reply->deleteLater();
     });
@@ -52,7 +52,9 @@ void DanmakuClient::listen(int roomid)
     qDebug() << u"监听房间号:"_s << roomid;
     QNetworkRequest request;
     request.setUrl(QUrl(u"https://api.live.bilibili.com/room/v1/Room/room_init?id=%1"_s.arg(roomid)));
-    auto reply = manager_->get(request);
+    QNetworkReply *reply = manager_->get(request);
+    // 我也不知道为什么, 在这里 Qt 文档指示也是先调用 get() 再进行消息的连接
+    // 应该不可能发生消息已经结束但是还没有连接成功吧?
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         do {
             if (reply->error() != QNetworkReply::NoError) {
@@ -89,7 +91,7 @@ void DanmakuClient::heartbeat()
     webSocket_->sendBinaryMessage(LivePackage::makeHeartbeatPackage().toByteArray());
 }
 
-void DanmakuClient::OnReceivedMessage(const QByteArray &message)
+void DanmakuClient::OnMessageReceived(const QByteArray &message)
 {
     LivePackage package = LivePackage::fromByteArray(message);
     switch (package.operation) {
@@ -101,11 +103,15 @@ void DanmakuClient::OnReceivedMessage(const QByteArray &message)
             break;
         }
         qDebug() << "当前人气:" << qFromBigEndian<quint32>(package.body.constData());
+        emit popularityFlushed(qFromBigEndian<quint32>(package.body.constData()));
         break;
     case LivePackage::Operation::ENTER_ROOM_RESPONSE:
         qDebug() << u"进入房间响应"_s;
-        using namespace std::chrono;
-        timerid_ = startTimer(30s);
+        heartbeat(); // 获取人气值
+        {
+            using namespace std::chrono;
+            timerid_ = startTimer(30s);
+        }
         break;
     case LivePackage::Operation::NOTIFICATION: {
         switch (package.protocolVersion) {
@@ -118,7 +124,7 @@ void DanmakuClient::OnReceivedMessage(const QByteArray &message)
             }
             qDebug() << json;
             Q_ASSERT(json.isObject());
-            emit receivedMessage(json.object());
+            emit messageReceived(json.object());
             break;
         }
         case LivePackage::ProtocolVersion::POPULARITY:
@@ -128,14 +134,15 @@ void DanmakuClient::OnReceivedMessage(const QByteArray &message)
                 break;
             }
             qDebug() << "当前人气:" << qFromBigEndian<quint32>(package.body.constData());
+            emit popularityFlushed(qFromBigEndian<quint32>(package.body.constData()));
             break;
         case LivePackage::ProtocolVersion::ZLIB_COMPRESSED_BUFFER: {
             QByteArray ucBody = zlib_uncompress(package.body);
             for (qsizetype pos = 0; pos < ucBody.size();) {
-                auto start       = ucBody.constData() + pos;
-                auto packageSize = qFromBigEndian<quint32>(start);
+                const char *start       = ucBody.constData() + pos;
+                quint32     packageSize = qFromBigEndian<quint32>(start);
                 Q_ASSERT(pos + packageSize <= ucBody.size());
-                OnReceivedMessage(QByteArray(start, packageSize));
+                OnMessageReceived(QByteArray(start, packageSize));
                 pos += packageSize;
             }
             break;

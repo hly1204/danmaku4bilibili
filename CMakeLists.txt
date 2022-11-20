@@ -13,6 +13,9 @@ set_target_properties(${PROJECT_NAME}
   PROPERTIES
     POSITION_INDEPENDENT_CODE True
     WIN32_EXECUTABLE $<IF:$<CONFIG:Debug>,False,True>
+    MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>DLL
+    # MSVC_TOOLSET_VERSION 143
+    COMPILE_DEFINITIONS_RELEASE QT_NO_DEBUG_OUTPUT
     AUTOMOC ON
     AUTOUIC ON
     AUTORCC ON
@@ -45,6 +48,6 @@ if (MSVC)
       COMMAND SET
       ARGS VCINSTALLDIR=${CMAKE_CXX_COMPILER}/../../../../../../../
       COMMAND ${WIN_DEPLOY_QT}
-      ARGS $<$<CONFIG:Debug>:--debug> $<$<CONFIG:Release>:--release> $<TARGET_FILE:${PROJECT_NAME}>)
+      ARGS --release $<TARGET_FILE:${PROJECT_NAME}>)
   endif ()
 endif ()

@@ -11,6 +11,7 @@ DanmakuTableModel::DanmakuTableModel(QObject *parent)
     : QAbstractTableModel(parent),
       danmakuClient_(),
       header_({u"时间"_s, u"UID"_s, u"用户名"_s, u"弹幕"_s}),
+      headerSize_({QSize(100, 20), QSize(100, 20), QSize(100, 20), QSize(200, 20)}),
       roomid_()
 {
 }
@@ -47,6 +48,7 @@ QVariant DanmakuTableModel::headerData(int section, Qt::Orientation orientation,
     case Qt::Horizontal:
         switch (role) {
         case Qt::DisplayRole: return header_[section];
+        case Qt::SizeHintRole: return headerSize_[section]; // 这个应该没有什么用?
         default: break;
         }
         [[fallthrough]];
@@ -64,7 +66,7 @@ void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
         return;
     }
     danmakuClient_ = client;
-    connect(danmakuClient_ = client, &DanmakuClient::receivedMessage, this, [this](const QJsonObject &json) {
+    connect(danmakuClient_ = client, &DanmakuClient::messageReceived, this, [this](const QJsonObject &json) {
         if (json["cmd"_L1] == "DANMU_MSG"_L1) {
             const int r = rowCount(QModelIndex());
             beginInsertRows(QModelIndex(), r, r);

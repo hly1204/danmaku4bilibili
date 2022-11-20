@@ -1,7 +1,10 @@
+# 配置文件夹
 .vscode/
 .idea/
-build/
-build-Debug/
-build-Release/
-3rdparty/
+
+# 构建文件夹
+build*/
+
+# 批处理文件
 *.bat
+!configure.bat

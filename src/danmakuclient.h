@@ -4,8 +4,9 @@
 #include <QJsonObject>
 #include <QObject>
 
-class QWebSocket;
-class QNetworkAccessManager;
+// QT
+QT_FORWARD_DECLARE_CLASS(QWebSocket);
+QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager);
 
 class DanmakuClient : public QObject
 {
@@ -41,8 +42,8 @@ public slots:
     void stop();
 
 signals:
-    void receivedMessage(const QJsonObject &json);
-    void flushPopularity(quint32 popularity);
+    void messageReceived(const QJsonObject &json);
+    void popularityFlushed(quint32 popularity);
     void connected();
     void disconnected();
 
@@ -51,7 +52,7 @@ protected:
 
 private slots:
     void heartbeat();
-    void OnReceivedMessage(const QByteArray &message);
+    void OnMessageReceived(const QByteArray &message);
 
 private:
     QWebSocket            *webSocket_;
