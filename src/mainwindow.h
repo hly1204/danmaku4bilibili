@@ -4,9 +4,9 @@
 #include <QMainWindow>
 
 // QT
-QT_FORWARD_DECLARE_CLASS(QTabWidget);
-QT_FORWARD_DECLARE_CLASS(QTableView);
-QT_FORWARD_DECLARE_CLASS(QSettings);
+class QTabWidget;
+class QTableView;
+class QSettings;
 
 class MainWindow : public QMainWindow
 {

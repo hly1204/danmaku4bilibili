@@ -126,8 +126,12 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // 配置状态栏刷新人气值
-    connect(danmakuClient, &DanmakuClient::popularityFlushed, this, [this](quint32 popularity) {
+    connect(danmakuClient, &DanmakuClient::popularityChanged, this, [this](quint32 popularity) {
         statusBar()->showMessage(u"人气: %1"_s.arg(popularity));
+    });
+    // 配置状态栏为多少人看过
+    connect(danmakuClient, &DanmakuClient::watchedChanged, this, [this](quint32 watched) {
+        statusBar()->showMessage(u"%1 人看过"_s.arg(watched));
     });
 }
 

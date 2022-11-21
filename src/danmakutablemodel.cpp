@@ -66,7 +66,7 @@ void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
         return;
     }
     danmakuClient_ = client;
-    connect(danmakuClient_ = client, &DanmakuClient::messageReceived, this, [this](const QJsonObject &json) {
+    connect(danmakuClient_, &DanmakuClient::messageReceived, this, [this](const QJsonObject &json) {
         if (json["cmd"_L1] == "DANMU_MSG"_L1) {
             const int r = rowCount(QModelIndex());
             beginInsertRows(QModelIndex(), r, r);

@@ -8,7 +8,7 @@
 #include <QVector>
 
 // CUSTOM
-QT_FORWARD_DECLARE_CLASS(DanmakuClient);
+class DanmakuClient;
 
 class DanmakuTableModel : public QAbstractTableModel
 {

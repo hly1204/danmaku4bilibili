@@ -5,8 +5,8 @@
 #include <QObject>
 
 // QT
-QT_FORWARD_DECLARE_CLASS(QWebSocket);
-QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager);
+class QWebSocket;
+class QNetworkAccessManager;
 
 class DanmakuClient : public QObject
 {
@@ -31,6 +31,7 @@ public:
         NOTICE_MSG,                    ///< 本房间续费了舰长 (区别与自动续费?)
         ACTIVITY_BANNER_UPDATE_V2,     ///< 小时榜变动
         ROOM_REAL_TIME_MESSAGE_UPDATE, ///< 粉丝关注变动
+        WATCHED_CHANGE,                ///< 观看人数变动
     };
 
     explicit DanmakuClient(QObject *parent = nullptr);
@@ -43,7 +44,8 @@ public slots:
 
 signals:
     void messageReceived(const QJsonObject &json);
-    void popularityFlushed(quint32 popularity);
+    void popularityChanged(quint32 popularity);
+    void watchedChanged(quint32 watched);
     void connected();
     void disconnected();
 

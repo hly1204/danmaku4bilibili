@@ -103,7 +103,7 @@ void DanmakuClient::OnMessageReceived(const QByteArray &message)
             break;
         }
         qDebug() << "当前人气:" << qFromBigEndian<quint32>(package.body.constData());
-        emit popularityFlushed(qFromBigEndian<quint32>(package.body.constData()));
+        emit popularityChanged(qFromBigEndian<quint32>(package.body.constData()));
         break;
     case LivePackage::Operation::ENTER_ROOM_RESPONSE:
         qDebug() << u"进入房间响应"_s;
@@ -125,6 +125,7 @@ void DanmakuClient::OnMessageReceived(const QByteArray &message)
             qDebug() << json;
             Q_ASSERT(json.isObject());
             emit messageReceived(json.object());
+            if (json["cmd"_L1] == "WATCHED_CHANGE"_L1) emit watchedChanged(json["data"_L1]["num"_L1].toInt());
             break;
         }
         case LivePackage::ProtocolVersion::POPULARITY:
@@ -134,7 +135,7 @@ void DanmakuClient::OnMessageReceived(const QByteArray &message)
                 break;
             }
             qDebug() << "当前人气:" << qFromBigEndian<quint32>(package.body.constData());
-            emit popularityFlushed(qFromBigEndian<quint32>(package.body.constData()));
+            emit popularityChanged(qFromBigEndian<quint32>(package.body.constData()));
             break;
         case LivePackage::ProtocolVersion::ZLIB_COMPRESSED_BUFFER: {
             QByteArray ucBody = zlib_uncompress(package.body);
