@@ -69,7 +69,6 @@ void DanmakuClient::listen(int roomid)
             }
             if ((roomid_ = json["data"_L1]["room_id"_L1].toInt(0)) != 0) webSocket_->open(QUrl("wss://broadcastlv.chat.bilibili.com/sub"_L1));
         } while (false);
-        reply->deleteLater();
     });
 }
 
