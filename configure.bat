@@ -5,6 +5,7 @@ SET _BUILD_DIR=%~dp0\build
 SET _SOURCE_DIR=%~dp0
 
 REM 使用 qt 的 cmake 环境, 不用手动配置工具链, 这里选择自己安装 Qt 的路径
+IF NOT EXIST %_BUILD_DIR% ^
 CALL "C:\Qt\6.4.1\msvc2022_64\bin\qt-cmake.bat" ^
 -B %_BUILD_DIR% -S %_SOURCE_DIR%
 

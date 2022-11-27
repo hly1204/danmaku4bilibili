@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     QScopedPointer a(new QApplication(argc, argv));
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, a->applicationDirPath());
     QTranslator t;
-    if (t.load("qt_zh_CN"_L1, a->applicationDirPath() + "/translations"_L1)) a->installTranslator(&t);
+    if (t.load(":/translations/qtbase_zh_CN"_L1)) a->installTranslator(&t);
     MainWindow w;
     w.show();
     return a->exec();

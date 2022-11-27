@@ -7,13 +7,17 @@ project(danmaku
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network WebSockets)
 
-add_executable(${PROJECT_NAME})
+qt_add_executable(${PROJECT_NAME})
+qt_add_resources(${PROJECT_NAME} "translations"
+  PREFIX "/"
+  BASE ${Qt6_DIR}/../../../
+  FILES ${Qt6_DIR}/../../../translations/qtbase_zh_CN.qm)
 
 set_target_properties(${PROJECT_NAME}
   PROPERTIES
     POSITION_INDEPENDENT_CODE True
     WIN32_EXECUTABLE $<IF:$<CONFIG:Debug>,False,True>
-    MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>DLL
+    MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug> # 动态库版本的 Qt 需要加 DLL 后缀
     # MSVC_TOOLSET_VERSION 143
     COMPILE_DEFINITIONS_RELEASE QT_NO_DEBUG_OUTPUT
     AUTOMOC ON
@@ -34,20 +38,3 @@ else ()
 endif ()
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::WebSockets)
-
-if (MSVC)
-  if (Qt6_DIR)
-    set(WIN_DEPLOY_QT ${Qt6_DIR}/../../../bin/windeployqt)
-  elseif (CMAKE_PREFIX_PATH)
-    set(WIN_DEPLOY_QT ${CMAKE_PREFIX_PATH}/bin/windeployqt)
-  endif ()
-
-  if (WIN_DEPLOY_QT)
-    add_custom_command(TARGET ${PROJECT_NAME}
-      POST_BUILD
-      COMMAND SET
-      ARGS VCINSTALLDIR=${CMAKE_CXX_COMPILER}/../../../../../../../
-      COMMAND ${WIN_DEPLOY_QT}
-      ARGS --release $<TARGET_FILE:${PROJECT_NAME}>)
-  endif ()
-endif ()

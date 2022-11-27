@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "aboutdanmakuclient.h"
 #include "danmakuclient.h"
 #include "danmakutablemodel.h"
 #include <QApplication>
@@ -7,7 +8,7 @@
 #include <QFileInfo>
 #include <QInputDialog>
 #include <QMenuBar>
-#include <QMessageBox>
+#include <QRect>
 #include <QResizeEvent>
 #include <QScreen>
 #include <QSettings>
@@ -36,9 +37,12 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar()->setObjectName(u"状态栏"_s);
     setWindowTitle(u"弹幕机"_s);
     setMinimumSize(320, 240);
+    // 设置窗口无法被最大化
+    setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
 
     DanmakuClient *danmakuClient = new DanmakuClient(this);
     tabWidget_->setParent(centralWidget());
+    tabWidget_->move(2, 2);
     {
         DanmakuTableModel *danmakuTableModel = new DanmakuTableModel(this);
         danmakuTableModel->setDanmakuClient(danmakuClient);
@@ -48,11 +52,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 读取配置
     {
-        const QSize size = QApplication::primaryScreen()->virtualSize();
-        int         w    = qBound(minimumWidth(), settings_->value("width"_L1, 640).toInt(), size.width());
-        int         h    = qBound(minimumHeight(), settings_->value("height"_L1, 480).toInt(), size.height());
-        int         x    = qBound(0, settings_->value("x"_L1, (size.width() - w) >> 1).toInt(), size.width() - w);
-        int         y    = qBound(0, settings_->value("y"_L1, (size.height() - h) >> 1).toInt(), size.height() - h);
+        const QSize size = QApplication::primaryScreen()->size();
+        const int   w    = qBound(minimumWidth(), settings_->value("width"_L1, 640).toInt(), size.width());
+        const int   h    = qBound(minimumHeight(), settings_->value("height"_L1, 480).toInt(), size.height());
+        const int   x    = qBound(0, settings_->value("x"_L1, (size.width() - w) >> 1).toInt(), size.width() - w);
+        const int   y    = qBound(0, settings_->value("y"_L1, (size.height() - h) >> 1).toInt(), size.height() - h);
         setGeometry(x, y, w, h);
     }
 
@@ -61,8 +65,9 @@ MainWindow::MainWindow(QWidget *parent)
         QMenu   *menuConfig   = menuBar()->addMenu(u"配置"_s);
         QAction *actionListen = menuConfig->addAction(u"监听"_s);
         QAction *actionStop   = menuConfig->addAction(u"停止"_s);
+
+        // 配置监听按钮
         actionListen->setEnabled(true);
-        actionStop->setEnabled(false);
         connect(actionListen, &QAction::triggered, this, [this, actionListen, actionStop]() {
             bool ok;
             int  roomid = QInputDialog::getInt(this, u"请输入房间号"_s, u"房间号"_s, 0, 1, std::numeric_limits<int>::max(), 1, &ok);
@@ -73,6 +78,9 @@ MainWindow::MainWindow(QWidget *parent)
                 setWindowTitle(windowTitle().prepend(QString::number(roomid) + " - "));
             }
         });
+
+        // 配置停止按钮
+        actionStop->setEnabled(false);
         connect(actionStop, &QAction::triggered, this, [this, actionListen, actionStop]() {
             qobject_cast<DanmakuTableModel *>(danmakuTableView_->model())->stop();
             actionListen->setEnabled(true);
@@ -80,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
             setWindowTitle(u"弹幕机"_s);
         });
 
+        // 若上一次保存的设置中监听的房间号非 0 则本次自动监听
         bool ok;
         int  roomid = settings_->value("roomid", 0).toInt(&ok);
         if (ok && roomid != 0) {
@@ -95,14 +104,11 @@ MainWindow::MainWindow(QWidget *parent)
     // 配置关于
     {
         QMenu   *menu        = menuBar()->addMenu(u"?"_s);
-        QAction *actionAbout = menu->addAction(u"关于"_s);
+        QAction *actionAbout = menu->addAction(u"关于..."_s);
         actionAbout->setEnabled(true);
         connect(actionAbout, &QAction::triggered, this, [this]() {
-            QString text = u"%1\n作者: %2\n源代码: %3\n构建时间: %4"_s.arg(u"本软件遵循 GPL-3.0 协议"_s)
-                               .arg(u"hly1204"_s)
-                               .arg(u"github.com/hly1204/danmaku4bilibili")
-                               .arg(QDateTime::currentDateTime().toString(Qt::ISODate));
-            QMessageBox::about(this, u"关于弹幕机"_s, text);
+            AboutDanmakuClient about(this);
+            return about.exec();
         });
     }
 
@@ -113,11 +119,17 @@ MainWindow::MainWindow(QWidget *parent)
         connect(danmakuTableView_, &QTableView::customContextMenuRequested, menu, [this, menu](const QPoint &pos) {
             menu->popup(danmakuTableView_->mapToGlobal(pos));
         });
-        QAction *actionClear = menu->addAction(u"清屏"_s);
+
+        QAction *actionAdjustColumnWidth    = menu->addAction(u"调整列宽"_s);
+        QAction *actionClear                = menu->addAction(u"清屏"_s);
+        QAction *actionAlwaysScrollToBottom = menu->addAction(u"总是滚动到底部"_s);
+
+        actionAdjustColumnWidth->setEnabled(true);
+        connect(actionAdjustColumnWidth, &QAction::triggered, danmakuTableView_, &QTableView::resizeColumnsToContents);
+
         actionClear->setEnabled(true);
         connect(actionClear, &QAction::triggered, qobject_cast<DanmakuTableModel *>(danmakuTableView_->model()), &DanmakuTableModel::clear);
-        QAction *actionAlwaysScrollToBottom = menu->addAction(u"总是滚动到底部"_s);
-        actionClear->setEnabled(true);
+
         actionAlwaysScrollToBottom->setCheckable(true);
         actionAlwaysScrollToBottom->setChecked(true);
         connect(danmakuTableView_->model(), &QAbstractItemModel::rowsInserted, danmakuTableView_, [this, actionAlwaysScrollToBottom]() {
@@ -125,10 +137,6 @@ MainWindow::MainWindow(QWidget *parent)
         });
     }
 
-    // 配置状态栏刷新人气值
-    connect(danmakuClient, &DanmakuClient::popularityChanged, this, [this](quint32 popularity) {
-        statusBar()->showMessage(u"人气: %1"_s.arg(popularity));
-    });
     // 配置状态栏为多少人看过
     connect(danmakuClient, &DanmakuClient::watchedChanged, this, [this](quint32 watched) {
         statusBar()->showMessage(u"%1 人看过"_s.arg(watched));
@@ -144,10 +152,11 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    settings_->setValue("x", x());
-    settings_->setValue("y", y());
-    settings_->setValue("width", width());
-    settings_->setValue("height", height());
+    QRect rect = geometry();
+    settings_->setValue("x", rect.x());
+    settings_->setValue("y", rect.y());
+    settings_->setValue("width", rect.width());
+    settings_->setValue("height", rect.height());
     settings_->setValue("roomid", qobject_cast<DanmakuTableModel *>(danmakuTableView_->model())->roomid());
     settings_->sync();
     event->accept();
