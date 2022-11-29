@@ -50,6 +50,7 @@ public:
     {
         QByteArray header(HEADER_SIZE, '\0');
         Q_ASSERT(headerSize == HEADER_SIZE);
+        if (ok != nullptr) *ok = true;
         char *a = header.data();
         qToBigEndian<quint32>(body.size() + HEADER_SIZE, a);
         qToBigEndian<quint16>(HEADER_SIZE, a += sizeof(quint32));
