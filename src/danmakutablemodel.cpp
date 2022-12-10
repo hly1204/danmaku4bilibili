@@ -35,7 +35,12 @@ QVariant DanmakuTableModel::data(const QModelIndex &index, int role) const
         const int r = index.row(), c = index.column();
         if (r >= rowCount(QModelIndex()) || c >= columnCount(QModelIndex())) break;
         switch (role) {
-        case Qt::DisplayRole: return danmaku_[r][c];
+        case Qt::DisplayRole: {
+            switch (c) {
+            case 0: return danmaku_[r][c].toDateTime().toString("yyyy/MM/dd hh:mm:ss"_L1);
+            default: return danmaku_[r][c];
+            }
+        }
         default: break;
         }
     } while (false);
@@ -67,7 +72,7 @@ void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
     }
     danmakuClient_ = client;
     connect(danmakuClient_, &DanmakuClient::messageReceived, this, [this](const QJsonObject &json) {
-        if (json["cmd"_L1] == "DANMU_MSG"_L1) {
+        if (json["cmd"_L1].toString().startsWith("DANMU_MSG"_L1)) {
             const int r = rowCount(QModelIndex());
             beginInsertRows(QModelIndex(), r, r);
             const QJsonValue jsonInfo = json["info"_L1];

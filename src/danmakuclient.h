@@ -46,6 +46,7 @@ signals:
     void messageReceived(const QJsonObject &json);
     void popularityChanged(quint32 popularity);
     void watchedChanged(quint32 watched);
+    void listenChanged(int oldroomid, int newroomid);
     void connected();
     void disconnected();
 

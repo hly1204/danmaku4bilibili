@@ -20,9 +20,10 @@ cmake --build build --config Release
 
 ### Qt6
 
-[LGPLv3](https://doc.qt.io/qt-6/lgpl.html).
+[GPLv3](https://doc.qt.io/qt-6/lgpl.html).
 
 ## 参考资料
 
-- [获取bilibili直播弹幕的WebSocket协议 - 炒鸡嗨客协管徐](https://blog.csdn.net/xfgryujk/article/details/80306776).
-- [通过WebSocket获取bilibili直播弹幕 - yy祝](https://blog.csdn.net/yyznm/article/details/116543107).
+1. [Bilibili-Live-API - lovelyyoshino (GitHub)](https://github.com/lovelyyoshino/Bilibili-Live-API).
+2. [获取bilibili直播弹幕的WebSocket协议 - 炒鸡嗨客协管徐](https://blog.csdn.net/xfgryujk/article/details/80306776).
+3. [通过WebSocket获取bilibili直播弹幕 - yy祝](https://blog.csdn.net/yyznm/article/details/116543107).

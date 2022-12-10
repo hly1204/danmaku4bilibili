@@ -29,16 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
       tabWidget_(new QTabWidget(this)),
       danmakuTableView_(new QTableView)
 {
-    setCentralWidget(new QWidget(this));
-    centralWidget()->setObjectName(u"中央微件"_s);
-    setMenuBar(new QMenuBar(this));
-    menuBar()->setObjectName(u"菜单栏"_s);
-    setStatusBar(new QStatusBar(this));
-    statusBar()->setObjectName(u"状态栏"_s);
-    setWindowTitle(u"弹幕机"_s);
-    setMinimumSize(320, 240);
+    this->setCentralWidget(new QWidget(this));
+    this->centralWidget()->setObjectName(u"中央微件"_s);
+    this->setMenuBar(new QMenuBar(this));
+    this->menuBar()->setObjectName(u"菜单栏"_s);
+    this->setStatusBar(new QStatusBar(this));
+    this->statusBar()->setObjectName(u"状态栏"_s);
+    this->setWindowTitle(u"弹幕机"_s);
+    this->setMinimumSize(320, 240);
     // 设置窗口无法被最大化
-    setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowMaximizeButtonHint);
 
     DanmakuClient *danmakuClient = new DanmakuClient(this);
     tabWidget_->setParent(centralWidget());
@@ -52,17 +52,17 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 读取配置
     {
-        const QSize size = QApplication::primaryScreen()->size();
+        const QSize size = qApp->primaryScreen()->size();
         const int   w    = qBound(minimumWidth(), settings_->value("width"_L1, 640).toInt(), size.width());
         const int   h    = qBound(minimumHeight(), settings_->value("height"_L1, 480).toInt(), size.height());
         const int   x    = qBound(0, settings_->value("x"_L1, (size.width() - w) >> 1).toInt(), size.width() - w);
         const int   y    = qBound(0, settings_->value("y"_L1, (size.height() - h) >> 1).toInt(), size.height() - h);
-        setGeometry(x, y, w, h);
+        this->setGeometry(x, y, w, h);
     }
 
     // 配置配置菜单
     {
-        QMenu   *menuConfig   = menuBar()->addMenu(u"配置"_s);
+        QMenu   *menuConfig   = this->menuBar()->addMenu(u"配置"_s);
         QAction *actionListen = menuConfig->addAction(u"监听"_s);
         QAction *actionStop   = menuConfig->addAction(u"停止"_s);
 
@@ -103,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 配置关于
     {
-        QMenu   *menu        = menuBar()->addMenu(u"?"_s);
+        QMenu   *menu        = this->menuBar()->addMenu(u"?"_s);
         QAction *actionAbout = menu->addAction(u"关于..."_s);
         actionAbout->setEnabled(true);
         connect(actionAbout, &QAction::triggered, this, [this]() {
@@ -116,9 +116,6 @@ MainWindow::MainWindow(QWidget *parent)
     {
         danmakuTableView_->setContextMenuPolicy(Qt::CustomContextMenu);
         QMenu *menu = new QMenu(this);
-        connect(danmakuTableView_, &QTableView::customContextMenuRequested, menu, [this, menu](const QPoint &pos) {
-            menu->popup(danmakuTableView_->mapToGlobal(pos));
-        });
 
         QAction *actionAdjustColumnWidth    = menu->addAction(u"调整列宽"_s);
         QAction *actionClear                = menu->addAction(u"清屏"_s);
@@ -135,24 +132,31 @@ MainWindow::MainWindow(QWidget *parent)
         connect(danmakuTableView_->model(), &QAbstractItemModel::rowsInserted, danmakuTableView_, [this, actionAlwaysScrollToBottom]() {
             if (actionAlwaysScrollToBottom->isChecked()) danmakuTableView_->scrollToBottom();
         });
+
+        connect(danmakuTableView_, &QTableView::customContextMenuRequested, menu, [this, menu](const QPoint &pos) {
+            menu->popup(danmakuTableView_->mapToGlobal(pos));
+        });
     }
 
     // 配置状态栏为多少人看过
-    connect(danmakuClient, &DanmakuClient::watchedChanged, this, [this](quint32 watched) {
-        statusBar()->showMessage(u"%1 人看过"_s.arg(watched));
-    });
+    {
+        QStatusBar *statusBar = this->statusBar();
+        connect(danmakuClient, &DanmakuClient::watchedChanged, statusBar, [statusBar](quint32 watched) {
+            statusBar->showMessage(u"%1 人看过"_s.arg(watched));
+        });
+    }
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
-    QWidget *w = centralWidget();
+    QWidget *w = this->centralWidget();
     tabWidget_->resize(w->width() - 4, w->height() - 4);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    QRect rect = geometry();
+    QRect rect = this->geometry();
     settings_->setValue("x", rect.x());
     settings_->setValue("y", rect.y());
     settings_->setValue("width", rect.width());

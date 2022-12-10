@@ -32,12 +32,12 @@ DanmakuClient::DanmakuClient(QObject *parent)
         qDebug() << u"已连接房间号:"_s << roomid_;
         webSocket_->sendBinaryMessage(LivePackage::makeEnterRoomPackage(roomid_).toByteArray());
         using namespace std::chrono_literals;
-        timerid_ = startTimer(30s);
+        timerid_ = this->startTimer(30s);
         if (timerid_ == 0) qDebug() << u"无法设置计时器"_s;
     });
     connect(webSocket_, &QWebSocket::disconnected, this, [this]() {
         emit disconnected();
-        if (timerid_ != 0) killTimer(timerid_);
+        if (timerid_ != 0) this->killTimer(timerid_);
         timerid_ = 0;
     });
     connect(webSocket_, &QWebSocket::binaryMessageReceived, this, &DanmakuClient::OnMessageReceived);
@@ -67,7 +67,11 @@ void DanmakuClient::listen(int roomid)
                 qDebug() << __FILE__ << __LINE__ << error.errorString();
                 break;
             }
-            if ((roomid_ = json["data"_L1]["room_id"_L1].toInt(0)) != 0) webSocket_->open(QUrl("wss://broadcastlv.chat.bilibili.com/sub"_L1));
+            int oldroomid = roomid_;
+            if ((roomid_ = json["data"_L1]["room_id"_L1].toInt(0)) != 0) {
+                webSocket_->open(QUrl("wss://broadcastlv.chat.bilibili.com/sub"_L1));
+                emit listenChanged(oldroomid, roomid_);
+            }
         } while (false);
     });
 }
@@ -80,7 +84,7 @@ void DanmakuClient::stop()
 
 void DanmakuClient::timerEvent(QTimerEvent *event)
 {
-    if (event->timerId() == timerid_) heartbeat();
+    if (event->timerId() == timerid_) this->heartbeat();
     return QObject::timerEvent(event);
 }
 
@@ -142,7 +146,7 @@ void DanmakuClient::OnMessageReceived(const QByteArray &message)
                 const char *start       = ucBody.constData() + pos;
                 quint32     packageSize = qFromBigEndian<quint32>(start);
                 Q_ASSERT(pos + packageSize <= ucBody.size());
-                OnMessageReceived(QByteArray(start, packageSize));
+                this->OnMessageReceived(QByteArray(start, packageSize));
                 pos += packageSize;
             }
             break;
