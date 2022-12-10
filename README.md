@@ -20,7 +20,7 @@ cmake --build build --config Release
 
 ### Qt6
 
-[GPLv3](https://doc.qt.io/qt-6/lgpl.html).
+[GPLv3](https://doc.qt.io/qt-6/gpl.html).
 
 ## 参考资料
 
