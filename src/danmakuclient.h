@@ -67,7 +67,8 @@ private:
     QWebSocket            *webSocket_;
     QNetworkAccessManager *manager_;
     int                    timerid_;
-    int                    roomid_;
+    int                    roomid_;     ///< 房间号(直播间 URL 上的)
+    int                    realRoomid_; ///< 通过 API 获取的真实房间号(直播间 URL 的房间号可能是后面分配的装饰用的号码)
 };
 
 #endif

@@ -24,13 +24,15 @@ DanmakuClient::DanmakuClient(QObject *parent)
       webSocket_(new QWebSocket),
       manager_(new QNetworkAccessManager(this)),
       timerid_(),
-      roomid_()
+      roomid_(),
+      realRoomid_()
 {
     webSocket_->setParent(this);
     connect(webSocket_, &QWebSocket::connected, this, [this]() {
         emit connected();
         qDebug() << u"已连接房间号:"_s << roomid_;
-        webSocket_->sendBinaryMessage(LivePackage::makeEnterRoomPackage(roomid_).toByteArray());
+        qDebug() << u"使用 API 获取房间号:"_s << realRoomid_;
+        webSocket_->sendBinaryMessage(LivePackage::makeEnterRoomPackage(realRoomid_).toByteArray());
         using namespace std::chrono_literals;
         timerid_ = this->startTimer(30s);
         if (timerid_ == 0) qDebug() << u"无法设置计时器"_s;
@@ -46,10 +48,7 @@ DanmakuClient::DanmakuClient(QObject *parent)
     });
 }
 
-int DanmakuClient::roomid() const
-{
-    return roomid_;
-}
+int DanmakuClient::roomid() const { return roomid_; }
 
 void DanmakuClient::listen(int roomid)
 {
@@ -60,7 +59,7 @@ void DanmakuClient::listen(int roomid)
     QNetworkReply *reply = manager_->get(request);
     // 我也不知道为什么, 在这里 Qt 文档指示也是先调用 get() 再进行消息的连接
     // 应该不可能发生消息已经结束但是还没有连接成功吧?
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, roomid, reply]() {
         do {
             if (reply->error() != QNetworkReply::NoError) {
                 qDebug() << __FILE__ << __LINE__ << reply->errorString();
@@ -72,10 +71,10 @@ void DanmakuClient::listen(int roomid)
                 qDebug() << __FILE__ << __LINE__ << error.errorString();
                 break;
             }
-            int oldroomid = roomid_;
-            if ((roomid_ = json["data"_L1]["room_id"_L1].toInt(0)) != 0) {
+            if ((realRoomid_ = json["data"_L1]["room_id"_L1].toInt(0)) != 0) {
                 webSocket_->open(QUrl("wss://broadcastlv.chat.bilibili.com/sub"_L1));
-                emit listenChanged(oldroomid, roomid_);
+                roomid_ = roomid;
+                emit listenChanged(roomid_, roomid);
             }
         } while (false);
     });
@@ -84,7 +83,8 @@ void DanmakuClient::listen(int roomid)
 void DanmakuClient::stop()
 {
     webSocket_->close();
-    roomid_ = 0;
+    roomid_     = 0;
+    realRoomid_ = 0;
 }
 
 void DanmakuClient::timerEvent(QTimerEvent *event)
