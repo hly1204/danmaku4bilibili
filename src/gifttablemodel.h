@@ -1,21 +1,22 @@
-#ifndef DANMAKU_TABLE_MODEL_H
-#define DANMAKU_TABLE_MODEL_H
+#ifndef GIFT_TABLE_MODEL_H
+#define GIFT_TABLE_MODEL_H
 
 #include <QAbstractTableModel>
+#include <QAtomicInt>
 #include <QSize>
 #include <QString>
 #include <QVariant>
-#include <QVector>
 
 // CUSTOM
 class DanmakuClient;
 
-class DanmakuTableModel : public QAbstractTableModel
+class GiftTableModel : public QAbstractTableModel
 {
     Q_OBJECT
+    Q_PROPERTY(int totalGiftReceived READ totalGiftReceived)
 
 public:
-    explicit DanmakuTableModel(QObject *parent = nullptr);
+    explicit GiftTableModel(QObject *parent = nullptr);
 
     int      rowCount(const QModelIndex &parent) const override;
     int      columnCount(const QModelIndex &parent) const override;
@@ -23,18 +24,20 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
     DanmakuClient *danmakuClient() const;
+    int            totalGiftReceived() const;
 
 public slots:
     void setDanmakuClient(DanmakuClient *client);
     void clear();
 
 private:
-    Q_DISABLE_COPY_MOVE(DanmakuTableModel)
+    Q_DISABLE_COPY_MOVE(GiftTableModel)
 
 private:
     DanmakuClient             *danmakuClient_;
     QVector<QString>           header_;
-    QVector<QVector<QVariant>> danmaku_;
+    QVector<QVector<QVariant>> gift_;
+    QAtomicInt                 totalGiftReceived_;
 };
 
 #endif

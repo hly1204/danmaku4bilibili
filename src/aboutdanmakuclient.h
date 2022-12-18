@@ -10,10 +10,12 @@ class QLabel;
 class AboutDanmakuClient : public QDialog
 {
     Q_OBJECT
-    Q_DISABLE_COPY_MOVE(AboutDanmakuClient)
 
 public:
     explicit AboutDanmakuClient(QWidget *parent = nullptr);
+
+private:
+    Q_DISABLE_COPY_MOVE(AboutDanmakuClient)
 
 private:
     QLabel      *authorLabel;

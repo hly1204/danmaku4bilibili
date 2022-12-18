@@ -7,7 +7,6 @@ using namespace Qt::Literals::StringLiterals;
 
 int main(int argc, char **argv)
 {
-    QApplication::setStyle("Fusion"_L1);
     QApplication a(argc, argv);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, a.applicationDirPath());
     QTranslator t;

@@ -8,10 +8,12 @@ class QTabWidget;
 class QTableView;
 class QSettings;
 
+// CUSTOM
+class DanmakuClient;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    Q_DISABLE_COPY_MOVE(MainWindow)
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -21,9 +23,14 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    QSettings  *settings_;
-    QTabWidget *tabWidget_;
-    QTableView *danmakuTableView_;
+    Q_DISABLE_COPY_MOVE(MainWindow)
+
+private:
+    DanmakuClient *danmakuClient_;
+    QSettings     *settings_;
+    QTabWidget    *tabWidget_;
+    QTableView    *danmakuTableView_;
+    QTableView    *giftTableView_;
 };
 
 #endif

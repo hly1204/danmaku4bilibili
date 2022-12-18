@@ -13,9 +13,9 @@ AboutDanmakuClient::AboutDanmakuClient(QWidget *parent)
       licenseLabel(new QLabel(this)),
       okButton(new QPushButton(this))
 {
-    setWindowTitle(u"关于弹幕机"_s);
-    setFixedSize(250, 140);
-    setWindowFlags(windowFlags() & ~Qt::WindowCloseButtonHint);
+    this->setWindowTitle(u"关于弹幕机"_s);
+    this->setFixedSize(250, 140);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowCloseButtonHint);
 
     okButton->setGeometry(90, 105, 70, 25);
     okButton->setText(u"关闭"_s);

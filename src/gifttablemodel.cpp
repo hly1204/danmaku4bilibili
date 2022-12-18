@@ -1,5 +1,6 @@
-#include "danmakutablemodel.h"
+#include "gifttablemodel.h"
 #include "danmakuclient.h"
+#include <QAtomicInt>
 #include <QDateTime>
 #include <QDebug>
 #include <QJsonValue>
@@ -8,26 +9,27 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-DanmakuTableModel::DanmakuTableModel(QObject *parent)
+GiftTableModel::GiftTableModel(QObject *parent)
     : QAbstractTableModel(parent),
       danmakuClient_(),
-      header_({u"时间"_s, u"UID"_s, u"用户名"_s, u"弹幕"_s})
+      header_({u"时间"_s, u"UID"_s, u"用户名"_s, u"礼物名"_s, u"价值(RMB 元)"_s}),
+      totalGiftReceived_(0)
 {
 }
 
-int DanmakuTableModel::rowCount(const QModelIndex &parent) const
+int GiftTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return static_cast<int>(danmaku_.size());
+    return static_cast<int>(gift_.size());
 }
 
-int DanmakuTableModel::columnCount(const QModelIndex &parent) const
+int GiftTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return static_cast<int>(header_.size());
 }
 
-QVariant DanmakuTableModel::data(const QModelIndex &index, int role) const
+QVariant GiftTableModel::data(const QModelIndex &index, int role) const
 {
     do {
         if (!index.isValid()) break;
@@ -37,8 +39,8 @@ QVariant DanmakuTableModel::data(const QModelIndex &index, int role) const
         switch (role) {
         case Qt::DisplayRole: {
             switch (c) {
-            case 0: return danmaku_[r][c].toDateTime().toString("yyyy/MM/dd hh:mm:ss"_L1);
-            default: return danmaku_[r][c];
+            case 0: return gift_[r][c].toDateTime().toString("yyyy/MM/dd hh:mm:ss"_L1);
+            default: return gift_[r][c];
             }
         }
         default: break;
@@ -47,7 +49,7 @@ QVariant DanmakuTableModel::data(const QModelIndex &index, int role) const
     return {};
 }
 
-QVariant DanmakuTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant GiftTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     switch (orientation) {
     case Qt::Horizontal:
@@ -62,9 +64,11 @@ QVariant DanmakuTableModel::headerData(int section, Qt::Orientation orientation,
     }
 }
 
-DanmakuClient *DanmakuTableModel::danmakuClient() const { return danmakuClient_; }
+DanmakuClient *GiftTableModel::danmakuClient() const { return danmakuClient_; }
 
-void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
+int GiftTableModel::totalGiftReceived() const { return totalGiftReceived_; }
+
+void GiftTableModel::setDanmakuClient(DanmakuClient *client)
 {
     if (danmakuClient_ != nullptr) {
         qWarning() << __func__ << "danmakuClient != nullptr"_L1;
@@ -72,24 +76,27 @@ void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
     }
     danmakuClient_ = client;
     connect(danmakuClient_, &DanmakuClient::messageReceived, this, [this](const QJsonObject &json) {
-        if (json["cmd"_L1].toString().startsWith("DANMU_MSG"_L1)) {
+        if (json["cmd"_L1].toString().startsWith("SEND_GIFT"_L1)) {
             const int r = rowCount(QModelIndex());
             beginInsertRows(QModelIndex(), r, r);
-            const QJsonValue jsonInfo = json["info"_L1];
+            const QJsonValue jsonData = json["data"_L1];
             // clang-format off
-            danmaku_.emplaceBack() << QDateTime::currentDateTime()
-                                   << jsonInfo[2][0].toInt()
-                                   << jsonInfo[2][1].toString()
-                                   << jsonInfo[1].toString();
+            int price = jsonData["price"_L1].toInt();
+            gift_.emplaceBack() << QDateTime::currentDateTime()
+                                << jsonData["uid"_L1].toInt()
+                                << jsonData["uname"_L1].toString()
+                                << jsonData["giftName"_L1].toString()
+                                << price / 1000.;
+            totalGiftReceived_ += price;
             // clang-format on
             endInsertRows();
         }
     });
 }
 
-void DanmakuTableModel::clear()
+void GiftTableModel::clear()
 {
     beginResetModel();
-    danmaku_.clear();
+    gift_.clear();
     endResetModel();
 }

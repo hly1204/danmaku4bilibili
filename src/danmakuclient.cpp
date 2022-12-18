@@ -46,6 +46,11 @@ DanmakuClient::DanmakuClient(QObject *parent)
     });
 }
 
+int DanmakuClient::roomid() const
+{
+    return roomid_;
+}
+
 void DanmakuClient::listen(int roomid)
 {
     Q_ASSERT(roomid > 0);
@@ -128,7 +133,14 @@ void DanmakuClient::OnMessageReceived(const QByteArray &message)
             qDebug() << json;
             Q_ASSERT(json.isObject());
             emit messageReceived(json.object());
-            if (json["cmd"_L1] == "WATCHED_CHANGE"_L1) emit watchedChanged(json["data"_L1]["num"_L1].toInt());
+            {
+                QString cmd = json["cmd"_L1].toString();
+                if (cmd.startsWith("WATCHED_CHANGE"_L1)) {
+                    emit watchedChanged(json["data"_L1]["num"_L1].toInt());
+                } else if (cmd.startsWith("SEND_GIFT"_L1)) {
+                    emit giftReceived(json["data"_L1]["price"_L1].toInt());
+                }
+            }
             break;
         }
         case LivePackage::ProtocolVersion::POPULARITY:

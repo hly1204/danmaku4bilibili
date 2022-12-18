@@ -11,7 +11,7 @@ class QNetworkAccessManager;
 class DanmakuClient : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY_MOVE(DanmakuClient)
+    Q_PROPERTY(int roomid READ roomid WRITE listen)
 
 public:
     enum MessageType : int {
@@ -36,6 +36,8 @@ public:
 
     explicit DanmakuClient(QObject *parent = nullptr);
 
+    int roomid() const;
+
 public slots:
     /// \brief 监听房间号(最多只允许调用一次)
     void listen(int roomid);
@@ -44,6 +46,7 @@ public slots:
 
 signals:
     void messageReceived(const QJsonObject &json);
+    void giftReceived(int gold);
     void popularityChanged(quint32 popularity);
     void watchedChanged(quint32 watched);
     void listenChanged(int oldroomid, int newroomid);
@@ -56,6 +59,9 @@ protected:
 private slots:
     void heartbeat();
     void OnMessageReceived(const QByteArray &message);
+
+private:
+    Q_DISABLE_COPY_MOVE(DanmakuClient)
 
 private:
     QWebSocket            *webSocket_;
