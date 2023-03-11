@@ -30,6 +30,6 @@ BEGIN
   END
   BLOCK "VarFileInfo"
   BEGIN
-    VALUE "Translation", 0x0409, 1252
+    VALUE "Translation", 0x0804, 1200 // see https://learn.microsoft.com/zh-cn/windows/win32/menurc/versioninfo-resource
   END
 END

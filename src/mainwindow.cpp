@@ -204,9 +204,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    Q_UNUSED(event);
     QWidget *w = this->centralWidget();
     tabWidget_->resize(w->width() - 4, w->height() - 4);
+    event->accept();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
