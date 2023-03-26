@@ -44,7 +44,7 @@ public:
 
     /// \brief 将包转换为二进制数组
     /// \details 其中包的长度和头部长度会自动设置, 不会使用当前的值
-    /// \param[out] ok 若 \c ok 非空, 则将转换结果放入其中, 否则将返回空数组
+    /// \param[out] ok 若 \a ok 非空, 则将转换结果放入其中, 否则将返回空数组
     /// \returns 二进制数组
     QByteArray toByteArray(bool *ok = nullptr) const
     {
@@ -62,7 +62,7 @@ public:
 
     /// \brief 将二进制数组转换为包
     /// \param[in] source 源
-    /// \param[out] ok 若 \c ok 非空, 则将转换结果放入其中, 否则将返回空数组
+    /// \param[out] ok 若 \a ok 非空, 则将转换结果放入其中, 否则将返回空数组
     /// \returns 包
     static inline LivePackage fromByteArray(const QByteArray &source, bool *ok = nullptr)
     {
