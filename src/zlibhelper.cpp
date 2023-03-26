@@ -31,7 +31,7 @@ QByteArray zlib_uncompress(QByteArrayView source, bool *ok)
             res.resize(bound);
             if (ok != nullptr) *ok = true;
             return res;
-        case Z_DATA_ERROR: [[fallthrough]];
+        case Z_DATA_ERROR: Q_FALLTHROUGH();
         case Z_MEM_ERROR:
             if (ok != nullptr) *ok = false;
             qWarning() << __func__ << "ERROR";

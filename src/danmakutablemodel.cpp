@@ -56,8 +56,8 @@ QVariant DanmakuTableModel::headerData(int section, Qt::Orientation orientation,
         case Qt::SizeHintRole: return {};
         default: break;
         }
-        [[fallthrough]];
-    case Qt::Vertical: [[fallthrough]];
+        Q_FALLTHROUGH();
+    case Qt::Vertical: Q_FALLTHROUGH();
     default: return {};
     }
 }
