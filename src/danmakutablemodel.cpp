@@ -78,7 +78,7 @@ void DanmakuTableModel::setDanmakuClient(DanmakuClient *client)
             const QJsonValue jsonInfo = json["info"_L1];
             // clang-format off
             danmaku_.emplaceBack() << QDateTime::currentDateTime()
-                                   << jsonInfo[2][0].toInt()
+                                   << jsonInfo[2][0].toInteger() // B 站的 UID 可以为更大的整数
                                    << jsonInfo[2][1].toString()
                                    << jsonInfo[1].toString();
             // clang-format on

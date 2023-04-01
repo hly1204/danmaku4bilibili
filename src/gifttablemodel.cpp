@@ -12,7 +12,7 @@ using namespace Qt::Literals::StringLiterals;
 GiftTableModel::GiftTableModel(QObject *parent)
     : QAbstractTableModel(parent),
       danmakuClient_(),
-      header_({u"时间"_s, u"UID"_s, u"用户名"_s, u"礼物名"_s, u"价值(RMB 元)"_s}),
+      header_({u"时间"_s, u"UID"_s, u"用户名"_s, u"礼物名"_s, u"价值(RMB 元)"_s, u"个数"_s, u"总价(RMB 元)"_s}),
       totalGiftReceived_(0)
 {
 }
@@ -81,12 +81,15 @@ void GiftTableModel::setDanmakuClient(DanmakuClient *client)
             beginInsertRows(QModelIndex(), r, r);
             const QJsonValue jsonData = json["data"_L1];
             // clang-format off
-            int price = jsonData["price"_L1].toInt();
+            const int price = jsonData["price"_L1].toInt();
+            const int num = jsonData["num"_L1].toInt();
             gift_.emplaceBack() << QDateTime::currentDateTime()
                                 << jsonData["uid"_L1].toInt()
                                 << jsonData["uname"_L1].toString()
                                 << jsonData["giftName"_L1].toString()
-                                << price / 1000.;
+                                << price / 1000.0
+                                << num
+                                << price * num / 1000.0; // 不会溢出。。没有人送那么多礼物吧
             totalGiftReceived_ += price;
             // clang-format on
             endInsertRows();

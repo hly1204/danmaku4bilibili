@@ -192,7 +192,7 @@ MainWindow::MainWindow(QWidget *parent)
         });
         connect(danmakuClient_, &DanmakuClient::giftReceived, this, [giftReceivedLabel, totalGiftReceived = 0ll](int gold) mutable {
             totalGiftReceived += gold;
-            giftReceivedLabel->setText(u"收入 %1 元"_s.arg(totalGiftReceived / 1000.));
+            giftReceivedLabel->setText(u"收入 %1 元"_s.arg(totalGiftReceived / 1000.0));
         });
     }
 }

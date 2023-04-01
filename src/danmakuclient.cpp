@@ -138,7 +138,10 @@ void DanmakuClient::OnMessageReceived(const QByteArray &message)
                 if (cmd.startsWith("WATCHED_CHANGE"_L1)) {
                     emit watchedChanged(json["data"_L1]["num"_L1].toInt());
                 } else if (cmd.startsWith("SEND_GIFT"_L1)) {
-                    emit giftReceived(json["data"_L1]["price"_L1].toInt());
+                    const QJsonValue jsonData = json["data"_L1];
+                    const int        price    = jsonData["price"_L1].toInt(); // 单个礼物的价格
+                    const int        num      = jsonData["num"_L1].toInt();   // 礼物个数
+                    emit giftReceived(num * price);
                 }
             }
             break;
