@@ -83,7 +83,7 @@ void GiftTableModel::setDanmakuClient(DanmakuClient *client)
             // clang-format off
             const int price = jsonData["price"_L1].toInt();
             const int num = jsonData["num"_L1].toInt();
-            gift_.emplaceBack() << QDateTime::currentDateTime()
+            gift_.emplaceBack() << QDateTime::fromSecsSinceEpoch(jsonData["timestamp"_L1].toInteger())
                                 << jsonData["uid"_L1].toInt()
                                 << jsonData["uname"_L1].toString()
                                 << jsonData["giftName"_L1].toString()

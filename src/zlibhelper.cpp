@@ -6,7 +6,7 @@
 QByteArray zlib_compress(QByteArrayView source, bool *ok)
 {
     const ulong n     = source.size();
-    ulong       bound = compressBound(n);
+    ulong       bound = ::compressBound(n);
     QByteArray  res(bound, '\0');
     if (::compress(reinterpret_cast<uchar *>(res.data()), &bound, reinterpret_cast<const uchar *>(source.constData()), n) != Z_OK) {
         if (ok != nullptr) *ok = false;
