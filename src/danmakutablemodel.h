@@ -1,5 +1,5 @@
-#ifndef DANMAKU_TABLE_MODEL_H
-#define DANMAKU_TABLE_MODEL_H
+#ifndef DANMAKU_TABLE_MODEL_H_
+#define DANMAKU_TABLE_MODEL_H_
 
 #include <QAbstractTableModel>
 #include <QSize>

@@ -1,5 +1,5 @@
-#ifndef ZLIB_HELPER_H
-#define ZLIB_HELPER_H
+#ifndef ZLIB_HELPER_H_
+#define ZLIB_HELPER_H_
 
 #include <QByteArray>
 #include <QByteArrayView>

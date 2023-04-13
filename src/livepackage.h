@@ -1,5 +1,5 @@
-#ifndef LIVE_PACKAGE_H
-#define LIVE_PACKAGE_H
+#ifndef LIVE_PACKAGE_H_
+#define LIVE_PACKAGE_H_
 
 #include <QByteArray>
 #include <QDebug>

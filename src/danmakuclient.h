@@ -1,5 +1,5 @@
-#ifndef DANMAKU_CLIENT_H
-#define DANMAKU_CLIENT_H
+#ifndef DANMAKU_CLIENT_H_
+#define DANMAKU_CLIENT_H_
 
 #include <QJsonObject>
 #include <QObject>

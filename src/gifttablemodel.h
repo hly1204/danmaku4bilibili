@@ -1,5 +1,5 @@
-#ifndef GIFT_TABLE_MODEL_H
-#define GIFT_TABLE_MODEL_H
+#ifndef GIFT_TABLE_MODEL_H_
+#define GIFT_TABLE_MODEL_H_
 
 #include <QAbstractTableModel>
 #include <QAtomicInt>

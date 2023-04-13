@@ -1,5 +1,5 @@
-#ifndef ABOUT_DANMAKU_CLIENT_H
-#define ABOUT_DANMAKU_CLIENT_H
+#ifndef ABOUT_DANMAKU_CLIENT_H_
+#define ABOUT_DANMAKU_CLIENT_H_
 
 #include <QDialog>
 
@@ -18,11 +18,11 @@ private:
     Q_DISABLE_COPY_MOVE(AboutDanmakuClient)
 
 private:
-    QLabel      *authorLabel;
-    QLabel      *sourceLabel;
-    QLabel      *dateLabel;
-    QLabel      *licenseLabel;
-    QPushButton *okButton;
+    QLabel      *authorLabel_;
+    QLabel      *sourceLabel_;
+    QLabel      *dateLabel_;
+    QLabel      *licenseLabel_;
+    QPushButton *okButton_;
 };
 
 #endif
