@@ -115,11 +115,6 @@ void DanmakuClient::OnMessageReceived(const QByteArray &message)
         break;
     case LivePackage::Operation::ENTER_ROOM_RESPONSE:
         qDebug() << u"进入房间响应"_s;
-        heartbeat(); // 获取人气值
-        {
-            using namespace std::chrono;
-            timerid_ = startTimer(30s);
-        }
         break;
     case LivePackage::Operation::NOTIFICATION: {
         switch (package.protocolVersion) {
